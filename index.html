@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SafeGate Ultra | Cyber Security</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --card-bg: rgba(15, 23, 42, 0.55);
+            --card-border: rgba(0, 242, 255, 0.25);
+            --primary: #00f2ff;
+            --primary-glow: rgba(0, 242, 255, 0.4);
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+            --danger: #ff4757;
+            --danger-glow: rgba(255, 71, 87, 0.4);
+            --success: #00ff88;
+            --success-glow: rgba(0, 255, 136, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        [data-theme="light"] {
+            --bg: #eef2f7;
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --card-border: rgba(0, 102, 204, 0.2);
+            --primary: #0066cc;
+            --primary-glow: rgba(0, 102, 204, 0.3);
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --danger: #dc2626;
+            --danger-glow: rgba(220, 38, 38, 0.3);
+            --success: #059669;
+            --success-glow: rgba(5, 150, 105, 0.3);
+            --glass-border: rgba(0, 0, 0, 0.08);
+        }
+
+        * { scrollbar-width: thin; scrollbar-color: var(--primary) transparent; }
+
+        body {
+            margin: 0;
+            font-family: 'Tajawal', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            transition: background 0.5s ease, color 0.5s ease;
+            min-height: 100vh;
+        }
+
+        #network-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; }
+        #matrix-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; opacity: 0; transition: opacity 0.6s ease; }
+        #matrix-bg.active { opacity: 0.12; }
+
+        .glass {
+            background: var(--card-bg);
+            backdrop-filter: blur(18px) saturate(1.4);
+            -webkit-backdrop-filter: blur(18px) saturate(1.4);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        }
+
+        .glass-neon {
+            border: 1px solid var(--card-border);
+            box-shadow: 0 0 20px var(--primary-glow), 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        .glow-border {
+            position: relative;
+        }
+        .glow-border::after {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: inherit;
+            padding: 1px;
+            background: conic-gradient(from 0deg, transparent, var(--primary), transparent 60%, var(--success) 80%, transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0.6;
+            pointer-events: none;
+            animation: spin-border 6s linear infinite;
+        }
+        @keyframes spin-border { to { transform: rotate(360deg); } }
+
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(10, 10, 15, 0.8);
+            backdrop-filter: blur(20px) saturate(1.5);
+            border-bottom: 1px solid var(--glass-border);
+            transition: background 0.5s ease;
+        }
+        [data-theme="light"] nav { background: rgba(255, 255, 255, 0.8); }
+
+        .lang-btn {
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 6px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .lang-btn:hover, .lang-btn.active { color: var(--primary); border-color: var(--primary); background: var(--primary-glow); }
+
+        .theme-btn {
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            color: var(--text);
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+        }
+        .theme-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+        .upload-zone {
+            border: 2px dashed var(--card-border);
+            border-radius: 20px;
+            padding: 50px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .upload-zone::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, var(--primary-glow), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .upload-zone:hover { border-color: var(--primary); }
+        .upload-zone:hover::before { opacity: 0.1; }
+        .upload-zone.dragover { border-color: var(--primary); border-style: solid; transform: scale(1.02); }
+        .upload-zone.dragover::before { opacity: 0.2; }
+        .upload-zone.dragover .upload-icon { animation: pulse-icon 0.8s ease infinite; }
+        @keyframes pulse-icon { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+
+        .upload-icon { font-size: 4rem; display: block; margin-bottom: 12px; transition: transform 0.3s ease; }
+
+        .btn-scan {
+            background: linear-gradient(135deg, var(--primary), #0088cc);
+            color: #000;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            font-family: inherit;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.35s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-scan:hover { transform: translateY(-3px); box-shadow: 0 0 30px var(--primary-glow); }
+        .btn-scan:active { transform: translateY(0); }
+        .btn-scan.loading { pointer-events: none; color: transparent; }
+        .btn-scan.loading::after {
+            content: '';
+            position: absolute;
+            width: 24px; height: 24px;
+            border: 3px solid rgba(0,0,0,0.2);
+            border-top-color: #000;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            top: 50%; left: 50%;
+            margin: -12px 0 0 -12px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .scanning-ring {
+            position: absolute;
+            inset: -4px;
+            border-radius: 50px;
+            border: 2px solid var(--primary);
+            opacity: 0;
+            animation: ring-pulse 1.5s ease-out infinite;
+        }
+        @keyframes ring-pulse { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(1.15); opacity: 0; } }
+
+        .gauge-container {
+            position: relative;
+            width: 200px;
+            height: 120px;
+            margin: 10px auto;
+            overflow: visible;
+        }
+        .gauge-container canvas { width: 100%; height: 100%; }
+        .gauge-text {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.8rem;
+            font-weight: 800;
+            font-family: 'Orbitron', monospace;
+        }
+
+        .history-item {
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border);
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .history-item:hover { background: rgba(255,255,255,0.06); border-color: var(--card-border); }
+
+        .badge-safe { background: rgba(0,255,136,0.15); color: var(--success); border: 1px solid rgba(0,255,136,0.3); }
+        .badge-danger { background: rgba(255,71,87,0.15); color: var(--danger); border: 1px solid rgba(255,71,87,0.3); }
+
+        .findings-table th { background: rgba(255,255,255,0.04); font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+        .findings-table td { font-size: 0.88rem; border-color: var(--glass-border); }
+        .findings-table tr:hover td { background: rgba(255,255,255,0.03); }
+
+        .matrix-row { background: linear-gradient(90deg, transparent, rgba(0,242,255,0.03), transparent); }
+
+        .history-scroll { max-height: calc(100vh - 260px); overflow-y: auto; padding-right: 4px; }
+
+        @media (max-width: 1024px) { .main-grid { grid-template-columns: 1fr !important; } }
+        @media (max-width: 640px) { .upload-zone { padding: 30px 20px; } }
+
+        .glass, .glass-neon, .upload-zone, .btn-scan, .history-item, .findings-table th,
+        .findings-table td, .lang-btn, .theme-btn, #scan-result, #result-content {
+            transition: background 0.5s ease, border-color 0.5s ease, color 0.5s ease, box-shadow 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="network-bg"></canvas>
+    <canvas id="matrix-bg"></canvas>
+
+    <nav>
+        <div class="flex items-center justify-between px-6 md:px-10 py-4 max-w-7xl mx-auto">
+            <div class="flex items-center gap-3">
+                <span style="font-family:'Orbitron',monospace;font-weight:800;font-size:1.4rem;color:var(--primary);letter-spacing:-0.5px;" class="tracking-tight">SAFEGATE</span>
+                <span style="font-family:'Orbitron',monospace;font-weight:400;font-size:0.7rem;color:var(--text-muted);border:1px solid var(--glass-border);border-radius:6px;padding:2px 8px;margin-top:4px;">ULTRA</span>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <div class="flex gap-1.5">
+                    <button class="lang-btn active" data-lang="ar"><span>🇩🇿</span> العربية</button>
+                    <button class="lang-btn" data-lang="en"><span>🇬🇧</span> EN</button>
+                    <button class="lang-btn" data-lang="fr"><span>🇫🇷</span> FR</button>
+                </div>
+                <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme">
+                    <i data-lucide="moon" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 md:px-6 py-8 main-grid" style="display:grid;grid-template-columns:1fr 340px;gap:24px;position:relative;z-index:1;">
+
+        <div class="glass glass-neon rounded-2xl p-6 md:p-8 glow-border">
+            <div class="flex items-center gap-3 mb-1">
+                <i data-lucide="shield" class="w-6 h-6" style="color:var(--primary);"></i>
+                <h2 id="t-title" class="text-xl font-bold tracking-tight" style="font-family:'Orbitron',monospace;">تحليل المنتجات الرقمية</h2>
+            </div>
+            <p id="t-desc" class="text-sm mb-6" style="color:var(--text-muted);">نظام الفحص الجنائي المتقدم للملفات البرمجية</p>
+
+            <div class="upload-zone" id="uploadZone">
+                <div class="relative z-10">
+                    <span class="upload-icon" id="uploadIcon">🛡️</span>
+                    <p id="t-drop" class="text-lg font-medium mb-1">اسحب الملف هنا أو اضغط للاختيار</p>
+                    <p class="text-xs" style="color:var(--text-muted);" id="t-support">يدعم جميع أنواع الملفات البرمجية</p>
+                    <div id="fileDisplay" class="mt-4 hidden">
+                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium" style="background:var(--primary-glow);color:var(--primary);border:1px solid var(--card-border);">
+                            <i data-lucide="file-text" class="w-4 h-4"></i>
+                            <span id="fileName"></span>
+                        </span>
+                    </div>
+                </div>
+                <input type="file" id="fileInput" class="hidden" />
+            </div>
+
+            <div class="mt-6 relative">
+                <button class="btn-scan" id="scanBtn" onclick="startDeepScan()">
+                    <span class="flex items-center justify-center gap-2 relative z-10">
+                        <i data-lucide="scan" class="w-5 h-5"></i>
+                        <span id="t-btn">بدء الفحص المعمق</span>
+                    </span>
+                    <span class="scanning-ring" id="scanRing"></span>
+                </button>
+            </div>
+
+            <div id="scan-result" class="mt-8"></div>
+        </div>
+
+        <div class="glass glass-neon rounded-2xl p-6 glow-border">
+            <div class="flex items-center gap-2 mb-5">
+                <i data-lucide="clock" class="w-5 h-5" style="color:var(--primary);"></i>
+                <h3 id="t-history" class="font-bold text-lg">سجل العمليات الأخيرة</h3>
+            </div>
+            <div class="history-scroll" id="history-list"></div>
+            <div id="historyEmpty" class="text-center py-10" style="color:var(--text-muted);">
+                <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-3 opacity-40"></i>
+                <p class="text-sm" id="t-empty">لا توجد عمليات فحص بعد</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        const i18n = {
+            ar: {
+                title: "تحليل المنتجات الرقمية", desc: "نظام الفحص الجنائي المتقدم للملفات البرمجية",
+                drop: "اسحب الملف هنا أو اضغط للاختيار", support: "يدعم جميع أنواع الملفات البرمجية",
+                btn: "بدء الفحص المعمق", history: "سجل العمليات الأخيرة", empty: "لا توجد عمليات فحص بعد",
+                safe: "سليم", danger: "تهديد", clean: "الملف سليم", threats: "تم اكتشاف تهديدات",
+                line: "السطر", type: "التصنيف", descCol: "الوصف", severity: "مستوى الخطورة",
+                scanning: "جاري الفحص...", serverOffline: "خادم الفحص غير متصل!",
+                selectFile: "الرجاء اختيار ملف أولاً", justNow: "الآن", threatCount: "تهديد", gauge: "نسبة الخطورة"
+            },
+            en: {
+                title: "Digital Product Analysis", desc: "Advanced Forensic File Scanning System",
+                drop: "Drop your file here or click to browse", support: "All executable and script file types supported",
+                btn: "Start Deep Scan", history: "Scan History", empty: "No scans yet",
+                safe: "Safe", danger: "Danger", clean: "File is Clean", threats: "Threats Detected",
+                line: "Line", type: "Category", descCol: "Description", severity: "Severity",
+                scanning: "Scanning...", serverOffline: "Scan server is offline!",
+                selectFile: "Please select a file first", justNow: "just now", threatCount: "threat", gauge: "Threat Level"
+            },
+            fr: {
+                title: "Analyse de Produit Num\u00e9rique", desc: "Syst\u00e8me avanc\u00e9 d'analyse m\u00e9dico-l\u00e9gale de fichiers",
+                drop: "D\u00e9posez votre fichier ici ou cliquez pour parcourir", support: "Tous les types de fichiers ex\u00e9cutables et script support\u00e9s",
+                btn: "Lancer le Scan Approfondi", history: "Historique des Scans", empty: "Aucun scan pour le moment",
+                safe: "Sain", danger: "Dangereux", clean: "Fichier Sain", threats: "Menaces D\u00e9tect\u00e9es",
+                line: "Ligne", type: "Cat\u00e9gorie", descCol: "Description", severity: "S\u00e9v\u00e9rit\u00e9",
+                scanning: "Scan en cours...", serverOffline: "Le serveur de scan est hors ligne!",
+                selectFile: "Veuillez d'abord s\u00e9lectionner un fichier", justNow: "\u00e0 l'instant", threatCount: "menace", gauge: "Niveau de Menace"
+            }
+        };
+
+        let currentLang = 'ar';
+
+        function setLang(lang) {
+            currentLang = lang;
+            const t = i18n[lang];
+            document.body.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            document.getElementById('t-title').innerText = t.title;
+            document.getElementById('t-desc').innerText = t.desc;
+            document.getElementById('t-drop').innerText = t.drop;
+            document.getElementById('t-support').innerText = t.support;
+            document.getElementById('t-btn').innerText = t.btn;
+            document.getElementById('t-history').innerText = t.history;
+            document.getElementById('t-empty').innerText = t.empty;
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+            lucide.createIcons();
+        }
+
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.addEventListener('click', () => setLang(btn.dataset.lang));
+        });
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.getAttribute('data-theme') === 'dark';
+            html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            const icon = document.querySelector('#themeBtn i');
+            icon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+            lucide.createIcons();
+        }
+
+        (function initNetwork() {
+            const canvas = document.getElementById('network-bg');
+            const ctx = canvas.getContext('2d');
+            let w, h, nodes, mouse = { x: -9999, y: -9999 };
+
+            function resize() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
+            resize();
+            window.addEventListener('resize', resize);
+
+            function createNodes(count) {
+                nodes = [];
+                for (let i = 0; i < count; i++) {
+                    nodes.push({
+                        x: Math.random() * w, y: Math.random() * h,
+                        vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.4,
+                        r: Math.random() * 2 + 1.5
+                    });
+                }
+            }
+            createNodes(80);
+
+            canvas.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+            canvas.addEventListener('mouseleave', () => { mouse.x = -9999; mouse.y = -9999; });
+
+            function draw() {
+                ctx.clearRect(0, 0, w, h);
+                nodes.forEach(n => {
+                    n.x += n.vx; n.y += n.vy;
+                    if (n.x < 0 || n.x > w) n.vx *= -1;
+                    if (n.y < 0 || n.y > h) n.vy *= -1;
+                    ctx.beginPath();
+                    ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+                    const light = document.documentElement.getAttribute('data-theme') === 'light';
+                    ctx.fillStyle = light ? 'rgba(0,102,204,0.5)' : 'rgba(0,242,255,0.5)';
+                    ctx.fill();
+                });
+                const maxDist = 150;
+                for (let i = 0; i < nodes.length; i++) {
+                    for (let j = i + 1; j < nodes.length; j++) {
+                        const dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < maxDist) {
+                            const alpha = (1 - dist / maxDist) * 0.35;
+                            const light = document.documentElement.getAttribute('data-theme') === 'light';
+                            ctx.strokeStyle = light ? `rgba(0,102,204,${alpha})` : `rgba(0,242,255,${alpha})`;
+                            ctx.lineWidth = 0.6;
+                            ctx.beginPath(); ctx.moveTo(nodes[i].x, nodes[i].y); ctx.lineTo(nodes[j].x, nodes[j].y); ctx.stroke();
+                        }
+                    }
+                    const dx = nodes[i].x - mouse.x, dy = nodes[i].y - mouse.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 200) {
+                        const alpha = (1 - dist / 200) * 0.5;
+                        const light = document.documentElement.getAttribute('data-theme') === 'light';
+                        ctx.strokeStyle = light ? `rgba(0,102,204,${alpha})` : `rgba(0,242,255,${alpha})`;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath(); ctx.moveTo(nodes[i].x, nodes[i].y); ctx.lineTo(mouse.x, mouse.y); ctx.stroke();
+                    }
+                }
+                requestAnimationFrame(draw);
+            }
+            draw();
+        })();
+
+        (function initMatrix() {
+            const canvas = document.getElementById('matrix-bg');
+            const ctx = canvas.getContext('2d');
+            let w, h, cols, drops;
+            function resize() {
+                w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight;
+                cols = Math.floor(w / 18); drops = Array(cols).fill(1).map(() => Math.random() * -100);
+            }
+            resize(); window.addEventListener('resize', resize);
+            function draw() {
+                ctx.fillStyle = 'rgba(10,10,15,0.08)'; ctx.fillRect(0, 0, w, h);
+                ctx.fillStyle = '#00f2ff'; ctx.font = '14px monospace';
+                for (let i = 0; i < drops.length; i++) {
+                    const char = String.fromCharCode(0x30A0 + Math.random() * 96);
+                    ctx.fillText(char, i * 18, drops[i] * 18);
+                    if (drops[i] * 18 > h && Math.random() > 0.975) drops[i] = 0;
+                    drops[i]++;
+                }
+                requestAnimationFrame(draw);
+            }
+            draw();
+        })();
+
+        function activateMatrix() { document.getElementById('matrix-bg').classList.add('active'); }
+        function deactivateMatrix() { document.getElementById('matrix-bg').classList.remove('active'); }
+
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileDisplay = document.getElementById('fileDisplay');
+        const fileName = document.getElementById('fileName');
+        const uploadIcon = document.getElementById('uploadIcon');
+        let selectedFile = null;
+
+        uploadZone.addEventListener('click', () => fileInput.click());
+        uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+        uploadZone.addEventListener('dragleave', () => { uploadZone.classList.remove('dragover'); });
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault(); uploadZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) setFile(e.dataTransfer.files[0]);
+        });
+        fileInput.addEventListener('change', () => { if (fileInput.files.length) setFile(fileInput.files[0]); });
+
+        function setFile(file) {
+            selectedFile = file;
+            fileName.innerText = file.name;
+            fileDisplay.classList.remove('hidden');
+            uploadIcon.innerText = '\uD83D\uDCC4';
+            gsap.fromTo(fileDisplay, { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.35, ease: 'back.out(1.7)' });
+            gsap.fromTo(uploadIcon, { rotation: -10 }, { rotation: 0, duration: 0.4, ease: 'elastic.out(1, 0.5)' });
+            lucide.createIcons();
+        }
+
+        function drawGauge(percent) {
+            const container = document.querySelector('.gauge-container');
+            if (!container) return;
+            const canvas = container.querySelector('canvas');
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            const rect = container.getBoundingClientRect();
+            const w = rect.width || 200, h = rect.height || 120;
+            canvas.width = w * dpr; canvas.height = h * dpr;
+            canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
+            ctx.scale(dpr, dpr);
+            const cx = w / 2, cy = h - 10;
+            const radius = Math.min(w, h * 1.6) / 2.2;
+            const startAngle = Math.PI * 0.75, endAngle = Math.PI * 2.25;
+            const currentAngle = startAngle + (endAngle - startAngle) * (percent / 100);
+            const light = document.documentElement.getAttribute('data-theme') === 'light';
+
+            ctx.beginPath(); ctx.arc(cx, cy, radius, startAngle, endAngle);
+            ctx.strokeStyle = light ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.08)';
+            ctx.lineWidth = 14; ctx.lineCap = 'round'; ctx.stroke();
+
+            const gradient = ctx.createLinearGradient(0, 0, w, 0);
+            if (percent < 40) { gradient.addColorStop(0, '#00ff88'); gradient.addColorStop(1, '#00f2ff'); }
+            else if (percent < 70) { gradient.addColorStop(0, '#ffaa00'); gradient.addColorStop(1, '#ff6600'); }
+            else { gradient.addColorStop(0, '#ff4757'); gradient.addColorStop(1, '#ff0055'); }
+
+            ctx.beginPath(); ctx.arc(cx, cy, radius, startAngle, currentAngle);
+            ctx.strokeStyle = gradient; ctx.lineWidth = 14; ctx.lineCap = 'round'; ctx.stroke();
+
+            ctx.shadowColor = percent >= 70 ? 'rgba(255,71,87,0.5)' : percent >= 40 ? 'rgba(255,170,0,0.4)' : 'rgba(0,255,136,0.4)';
+            ctx.shadowBlur = 20;
+            ctx.beginPath(); ctx.arc(cx, cy, radius, startAngle, currentAngle);
+            ctx.strokeStyle = gradient; ctx.lineWidth = 14; ctx.lineCap = 'round'; ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            const dotX = cx + Math.cos(currentAngle) * radius, dotY = cy + Math.sin(currentAngle) * radius;
+            ctx.beginPath(); ctx.arc(dotX, dotY, 5, 0, Math.PI * 2);
+            ctx.fillStyle = percent >= 70 ? '#ff4757' : percent >= 40 ? '#ffaa00' : '#00ff88'; ctx.fill();
+            ctx.beginPath(); ctx.arc(dotX, dotY, 9, 0, Math.PI * 2);
+            ctx.fillStyle = percent >= 70 ? 'rgba(255,71,87,0.25)' : percent >= 40 ? 'rgba(255,170,0,0.25)' : 'rgba(0,255,136,0.25)'; ctx.fill();
+
+            const textEl = container.querySelector('.gauge-text');
+            if (textEl) {
+                textEl.innerText = Math.round(percent) + '%';
+                textEl.style.color = percent >= 70 ? 'var(--danger)' : percent >= 40 ? '#ffaa00' : 'var(--success)';
+            }
+        }
+
+        let history = JSON.parse(localStorage.getItem('sg_history') || '[]');
+        updateHistoryUI();
+
+        function startDeepScan() {
+            if (!selectedFile) {
+                gsap.to(uploadZone, { x: -8, duration: 0.08, repeat: 5, yoyo: true, ease: 'power2.inOut', onComplete: () => gsap.set(uploadZone, { x: 0 }) });
+                return;
+            }
+
+            const btn = document.getElementById('scanBtn');
+            btn.classList.add('loading');
+            const t = i18n[currentLang];
+            document.getElementById('t-btn').innerText = t.scanning;
+            activateMatrix();
+            gsap.to('#scanRing', { scale: 1.5, opacity: 0, duration: 1, repeat: -1, ease: 'power2.out' });
+
+            const fd = new FormData();
+            fd.append('file', selectedFile);
+
+            fetch('http://127.0.0.1:8000/scan', { method: 'POST', body: fd })
+                .then(res => { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
+                .then(data => {
+                    btn.classList.remove('loading');
+                    document.getElementById('t-btn').innerText = t.btn;
+                    gsap.killTweensOf('#scanRing'); gsap.set('#scanRing', { scale: 1, opacity: 0 });
+                    deactivateMatrix();
+                    displayResult(data, selectedFile.name);
+                    saveToHistory(data, selectedFile.name);
+                })
+                .catch(err => {
+                    btn.classList.remove('loading');
+                    document.getElementById('t-btn').innerText = t.btn;
+                    gsap.killTweensOf('#scanRing'); gsap.set('#scanRing', { scale: 1, opacity: 0 });
+                    deactivateMatrix();
+                    document.getElementById('scan-result').innerHTML = `
+                        <div class="glass rounded-xl p-6 text-center" style="border:1px solid rgba(255,71,87,0.3);">
+                            <i data-lucide="wifi-off" class="w-10 h-10 mx-auto mb-3" style="color:var(--danger);"></i>
+                            <p style="color:var(--danger);font-weight:700;">${t.serverOffline}</p>
+                            <p class="text-xs mt-2" style="color:var(--text-muted);">${err.message}</p>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                });
+        }
+
+        function displayResult(data, filename) {
+            const t = i18n[currentLang];
+            const isSafe = data.safe === true;
+            const findings = data.findings || [];
+            const threatLevel = isSafe ? 0 : Math.min(100, findings.length * 15 + 10);
+
+            let html = `
+                <div class="glass rounded-xl p-5 mb-5 text-center" style="border:1px solid ${isSafe ? 'rgba(0,255,136,0.3)' : 'rgba(255,71,87,0.3)'};">
+                    <div class="flex items-center justify-center gap-3 mb-2">
+                        <i data-lucide="${isSafe ? 'shield-check' : 'alert-triangle'}" class="w-8 h-8" style="color:${isSafe ? 'var(--success)' : 'var(--danger)'};"></i>
+                        <h3 class="text-xl font-bold" style="font-family:'Orbitron',monospace;color:${isSafe ? 'var(--success)' : 'var(--danger)'};">${isSafe ? t.clean : t.threats}</h3>
+                    </div>
+                    <p class="text-sm" style="color:var(--text-muted);">
+                        ${isSafe ? filename : filename + ' — ' + findings.length + ' ' + t.threatCount + (findings.length > 1 ? (currentLang === 'ar' ? 'ات' : currentLang === 'fr' ? 's' : 's') : '')}
+                    </p>
+                </div>
+                <div class="flex flex-wrap gap-5 mb-5 items-center justify-center">
+                    <div class="gauge-container">
+                        <canvas></canvas>
+                        <div class="gauge-text">0%</div>
+                    </div>
+                    <div class="text-left" style="min-width:140px;">
+                        <p class="text-xs uppercase tracking-wider mb-2" style="color:var(--text-muted);">${t.severity}</p>
+                        <p class="text-lg font-bold" style="font-family:'Orbitron',monospace;color:${isSafe ? 'var(--success)' : threatLevel >= 70 ? 'var(--danger)' : '#ffaa00'};">
+                            ${isSafe ? t.safe : threatLevel >= 70 ? t.danger : (currentLang === 'ar' ? 'متوسط' : currentLang === 'fr' ? 'Moyen' : 'Medium')}
+                        </p>
+                        <p class="text-xs mt-1" style="color:var(--text-muted);">
+                            ${findings.length} ${t.threatCount}${findings.length !== 1 ? (currentLang === 'ar' ? 'ات' : currentLang === 'fr' ? 's' : 's') : ''}
+                        </p>
+                    </div>
+                </div>
+            `;
+
+            if (findings.length > 0) {
+                html += `
+                    <div class="glass rounded-xl overflow-hidden" style="border:1px solid var(--glass-border);">
+                        <table class="findings-table w-full text-sm">
+                            <thead><tr>
+                                <th class="px-4 py-3 text-left">${t.line}</th>
+                                <th class="px-4 py-3 text-left">${t.type}</th>
+                                <th class="px-4 py-3 text-left">${t.descCol}</th>
+                            </tr></thead>
+                            <tbody>
+                `;
+                findings.forEach((f, idx) => {
+                    const icon = f.cat && f.cat.toLowerCase().includes('malware') ? 'bug'
+                        : f.cat && f.cat.toLowerCase().includes('suspicious') ? 'search'
+                        : f.cat && f.cat.toLowerCase().includes('obfuscated') ? 'eye-off'
+                        : f.cat && f.cat.toLowerCase().includes('danger') ? 'skull'
+                        : 'alert-circle';
+                    html += `
+                        <tr class="${idx % 2 === 0 ? 'matrix-row' : ''}">
+                            <td class="px-4 py-3 font-mono text-xs">${f.line || '-'}</td>
+                            <td class="px-4 py-3">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium" style="background:rgba(255,71,87,0.12);color:var(--danger);border:1px solid rgba(255,71,87,0.2);">
+                                    <i data-lucide="${icon}" class="w-3 h-3"></i> ${f.cat || 'Unknown'}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3" style="color:var(--text-muted);">${f.desc || '-'}</td>
+                        </tr>
+                    `;
+                });
+                html += `</tbody></table></div>`;
+            }
+
+            const resultDiv = document.getElementById('scan-result');
+            resultDiv.innerHTML = html;
+            lucide.createIcons();
+            requestAnimationFrame(() => drawGauge(threatLevel));
+            gsap.fromTo(resultDiv.children, { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, stagger: 0.1, ease: 'power3.out' });
+        }
+
+        function saveToHistory(data, filename) {
+            const t = i18n[currentLang];
+            history.unshift({
+                filename, status: data.safe ? 'Safe' : 'Danger',
+                time: new Date().toISOString(), label: data.safe ? t.safe : t.danger
+            });
+            if (history.length > 20) history.pop();
+            localStorage.setItem('sg_history', JSON.stringify(history));
+            updateHistoryUI();
+        }
+
+        function updateHistoryUI() {
+            const list = document.getElementById('history-list');
+            const empty = document.getElementById('historyEmpty');
+            if (history.length === 0) { list.innerHTML = ''; empty.style.display = 'block'; return; }
+            empty.style.display = 'none';
+            list.innerHTML = history.map((h, idx) => {
+                const isSafe = h.status === 'Safe';
+                return `
+                    <div class="history-item" style="animation:slideIn 0.3s ease ${idx * 0.05}s both;">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center ${isSafe ? 'badge-safe' : 'badge-danger'}">
+                            <i data-lucide="${isSafe ? 'check' : 'skull'}" class="w-4 h-4"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium truncate">${h.filename}</p>
+                            <p class="text-xs" style="color:var(--text-muted);">${getTimeAgo(h.time)}</p>
+                        </div>
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${isSafe ? 'badge-safe' : 'badge-danger'}">${h.label}</span>
+                    </div>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function getTimeAgo(isoString) {
+            const t = i18n[currentLang];
+            const diff = Date.now() - new Date(isoString).getTime();
+            const sec = Math.floor(diff / 1000);
+            if (sec < 5) return t.justNow;
+            if (sec < 60) return sec + 's';
+            const min = Math.floor(sec / 60);
+            if (min < 60) return min + 'm';
+            return new Date(isoString).toLocaleTimeString(
+                currentLang === 'ar' ? 'ar-SA' : currentLang === 'fr' ? 'fr-FR' : 'en-US',
+                { hour: '2-digit', minute: '2-digit' }
+            );
+        }
+
+        setLang('ar');
+
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: translateX(0); } }
+            [dir="ltr"] .history-item { animation-name: slideInLtr !important; }
+            @keyframes slideInLtr { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
